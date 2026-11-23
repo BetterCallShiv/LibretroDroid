@@ -109,6 +109,9 @@ public:
     void refreshAspectRatio();
     float getAspectRatio();
 
+    void* getCoreMemoryData(unsigned id);
+    size_t getCoreMemorySize(unsigned id);
+
     bool requiresVideoRefresh() const;
     void clearRequiresVideoRefresh();
 
@@ -160,6 +163,7 @@ private:
     bool audioEnabled = true;
     bool preferLowLatencyAudio = false;
     bool rumbleEnabled = false;
+    bool gameLoaded = false;
 
     ShaderManager::Config fragmentShaderConfig = ShaderManager::Config {
         ShaderManager::Type::SHADER_DEFAULT, { }

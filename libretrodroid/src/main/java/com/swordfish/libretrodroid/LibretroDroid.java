@@ -141,4 +141,29 @@ public class LibretroDroid {
 
     public static native Controller[][] getControllers();
     public static native void setControllerType(int port, int type);
+
+    public static native void initRetroAchievements(
+        String username,
+        String token,
+        boolean hardcore,
+        RetroAchievementsListener listener
+    );
+
+    public static native void loginRetroAchievements(
+        String username,
+        String passwordOrToken,
+        boolean isPassword
+    );
+
+    public static native void loadRetroAchievementsGame(
+        int consoleId,
+        String hash,
+        String gamePath
+    );
+
+    public static native void sendRetroAchievementsServerResponse(
+        long requestId,
+        int statusCode,
+        String responseBody
+    );
 }

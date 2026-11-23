@@ -108,6 +108,10 @@ public:
 
     const std::vector<std::vector<struct Controller>> &getControllers() const;
 
+    const struct retro_memory_map* getMemoryMap() const {
+        return hasMemoryMap ? &memoryMap : nullptr;
+    }
+
 private:
     bool environment_handle_set_variables(const struct retro_variable* received);
     bool environment_handle_get_variable(struct retro_variable* requested);
@@ -148,6 +152,10 @@ private:
     bool dirtyVariables = false;
 
     std::vector<std::vector<struct Controller>> controllers;
+
+    struct retro_memory_map memoryMap{};
+    std::vector<struct retro_memory_descriptor> memoryDescriptors;
+    bool hasMemoryMap = false;
 };
 
 struct Variable {

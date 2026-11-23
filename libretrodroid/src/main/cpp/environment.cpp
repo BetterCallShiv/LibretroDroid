@@ -66,6 +66,10 @@ void Environment::deinitialize() {
     gameGeometryAspectRatio = -1.0f;
 
     rumbleStates.fill(libretrodroid::RumbleState {});
+
+    hasMemoryMap = false;
+    memoryDescriptors.clear();
+    memset(&memoryMap, 0, sizeof(memoryMap));
 }
 
 void Environment::updateVariable(const std::string& key, const std::string& value) {
@@ -334,6 +338,18 @@ bool Environment::handle_callback_environment(unsigned cmd, void *data) {
         case RETRO_ENVIRONMENT_GET_MICROPHONE_INTERFACE:
             LOGD("Called RETRO_ENVIRONMENT_GET_MICROPHONE_INTERFACE");
             return environment_handle_get_microphone_interface(static_cast<struct retro_microphone_interface*>(data));
+
+        case RETRO_ENVIRONMENT_SET_MEMORY_MAPS: {
+            LOGD("Called RETRO_ENVIRONMENT_SET_MEMORY_MAPS");
+            const auto* mmap = static_cast<const struct retro_memory_map*>(data);
+            if (mmap && mmap->descriptors && mmap->num_descriptors > 0) {
+                memoryDescriptors.assign(mmap->descriptors, mmap->descriptors + mmap->num_descriptors);
+                memoryMap.descriptors = memoryDescriptors.data();
+                memoryMap.num_descriptors = memoryDescriptors.size();
+                hasMemoryMap = true;
+            }
+            return true;
+        }
 
         default:
             LOGD("callback environment has been called: %u", cmd);

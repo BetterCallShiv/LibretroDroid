@@ -37,6 +37,7 @@
 #include "shadermanager.h"
 #include "utils/javautils.h"
 #include "environment.h"
+#include "retroachievements.h"
 #include "renderers/es3/framebufferrenderer.h"
 #include "renderers/es2/imagerendereres2.h"
 #include "renderers/es3/imagerendereres3.h"
@@ -407,6 +408,7 @@ void LibretroDroid::loadGameFromVirtualFiles(std::vector<VFSFile> virtualFiles) 
 void LibretroDroid::destroy() {
     std::lock_guard<std::mutex> lock(coreLock);
 
+    gameLoaded = false;
     LOGD("Performing libretrodroid destroy");
 
     if (Environment::getInstance().getHwContextDestroy() != nullptr) {
@@ -415,6 +417,8 @@ void LibretroDroid::destroy() {
 
     core->retro_unload_game();
     core->retro_deinit();
+
+    RetroAchievementsManager::getInstance().destroy();
 
     video = nullptr;
     core = nullptr;
@@ -440,6 +444,8 @@ void LibretroDroid::pause() {
     LOGD("Performing libretrodroid pause");
     audio->stop();
 
+    RetroAchievementsManager::getInstance().idle();
+
     input = nullptr;
 }
 
@@ -456,8 +462,10 @@ void LibretroDroid::step() {
         frames = std::min(requestedFrames, 2u);
     }
 
-    for (size_t i = 0; i < frames * frameSpeed; i++)
+    for (size_t i = 0; i < frames * frameSpeed; i++) {
         core->retro_run();
+        RetroAchievementsManager::getInstance().doFrame();
+    }
 
     if (video && !video->rendersInVideoCallback()) {
         video->renderFrame();
@@ -497,6 +505,16 @@ float LibretroDroid::getAspectRatio() {
 
 void LibretroDroid::refreshAspectRatio() {
     video->updateAspectRatio(getAspectRatio());
+}
+
+void* LibretroDroid::getCoreMemoryData(unsigned id) {
+    if (!gameLoaded || !core) return nullptr;
+    return core->retro_get_memory_data(id);
+}
+
+size_t LibretroDroid::getCoreMemorySize(unsigned id) {
+    if (!gameLoaded || !core) return 0;
+    return core->retro_get_memory_size(id);
 }
 
 void LibretroDroid::setRumbleEnabled(bool enabled) {
@@ -568,6 +586,7 @@ void LibretroDroid::reset() {
     std::lock_guard<std::mutex> lock(coreLock);
 
     core->retro_reset();
+    RetroAchievementsManager::getInstance().reset();
 }
 
 std::pair<int8_t*, size_t> LibretroDroid::serializeState() {
@@ -618,6 +637,8 @@ void LibretroDroid::afterGameLoad() {
     updateAudioSampleRateMultiplier();
 
     defaultAspectRatio = findDefaultAspectRatio(system_av_info);
+    gameLoaded = true;
+    RetroAchievementsManager::getInstance().onGameLoadedInCore();
 }
 
 float LibretroDroid::findDefaultAspectRatio(const retro_system_av_info& system_av_info) {

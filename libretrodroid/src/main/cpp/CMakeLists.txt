@@ -12,6 +12,8 @@ include_directories (${OBOE_DIR}/include)
 include_directories (${OBOE_DIR}/src)
 
 include_directories("libretro/libretro-common/include")
+include_directories("rcheevos/include")
+include_directories("rcheevos/src")
 
 set (LIBRETRO_COMMON
         libretro/libretro-common/vfs/vfs_implementation.c
@@ -19,6 +21,15 @@ set (LIBRETRO_COMMON
         libretro/libretro-common/encodings/encoding_utf.c
         libretro/libretro-common/file/file_path.c
         libretro/libretro-common/time/rtime.c
+)
+
+file(GLOB_RECURSE RCHEEVOS_SRC
+        rcheevos/src/api/*.c
+        rcheevos/src/client/*.c
+        rcheevos/src/hash/*.c
+        rcheevos/src/libretro/*.c
+        rcheevos/src/runtime/*.c
+        rcheevos/src/util/*.c
 )
 
 add_library(libretrodroid SHARED
@@ -87,7 +98,10 @@ add_library(libretrodroid SHARED
         microphone/microphone.cpp
         microphone/microphoneinterface.h
         microphone/microphoneinterface.cpp
+        retroachievements.h
+        retroachievements.cpp
         ${LIBRETRO_COMMON}
+        ${RCHEEVOS_SRC}
 )
 
 # Support 16k pages for Android 15

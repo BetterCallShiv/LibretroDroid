@@ -42,6 +42,7 @@
 #include "renderers/es3/framebufferrenderer.h"
 #include "renderers/es2/imagerendereres2.h"
 #include "renderers/es3/imagerendereres3.h"
+#include "retroachievements.h"
 #include "utils/jnistring.h"
 
 namespace libretrodroid {
@@ -604,6 +605,56 @@ JNIEXPORT void JNICALL Java_com_swordfish_libretrodroid_LibretroDroid_refreshAsp
     jclass obj
 ) {
     LibretroDroid::getInstance().refreshAspectRatio();
+}
+
+JNIEXPORT void JNICALL Java_com_swordfish_libretrodroid_LibretroDroid_initRetroAchievements(
+    JNIEnv* env,
+    jclass obj,
+    jstring jUsername,
+    jstring jToken,
+    jboolean jHardcore,
+    jobject jListener
+) {
+    JavaVM* vm = nullptr;
+    env->GetJavaVM(&vm);
+    std::string username = JniString(env, jUsername).stdString();
+    std::string token = JniString(env, jToken).stdString();
+    RetroAchievementsManager::getInstance().init(vm, jListener, username, token, (bool) jHardcore);
+}
+
+JNIEXPORT void JNICALL Java_com_swordfish_libretrodroid_LibretroDroid_loadRetroAchievementsGame(
+    JNIEnv* env,
+    jclass obj,
+    jint jConsoleId,
+    jstring jHash,
+    jstring jGamePath
+) {
+    std::string hash = JniString(env, jHash).stdString();
+    std::string gamePath = JniString(env, jGamePath).stdString();
+    RetroAchievementsManager::getInstance().loadGame((uint32_t) jConsoleId, hash, gamePath);
+}
+
+JNIEXPORT void JNICALL Java_com_swordfish_libretrodroid_LibretroDroid_sendRetroAchievementsServerResponse(
+    JNIEnv* env,
+    jclass obj,
+    jlong jRequestId,
+    jint jStatusCode,
+    jstring jResponseBody
+) {
+    std::string body = JniString(env, jResponseBody).stdString();
+    RetroAchievementsManager::getInstance().sendServerResponse((int64_t) jRequestId, (int) jStatusCode, body);
+}
+
+JNIEXPORT void JNICALL Java_com_swordfish_libretrodroid_LibretroDroid_loginRetroAchievements(
+    JNIEnv* env,
+    jclass obj,
+    jstring jUsername,
+    jstring jPasswordOrToken,
+    jboolean jIsPassword
+) {
+    std::string username = JniString(env, jUsername).stdString();
+    std::string credential = JniString(env, jPasswordOrToken).stdString();
+    RetroAchievementsManager::getInstance().login(username, credential, (bool) jIsPassword);
 }
 
 }
