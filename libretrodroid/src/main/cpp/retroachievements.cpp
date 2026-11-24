@@ -155,6 +155,22 @@ void RetroAchievementsManager::initMemory(uint32_t consoleId) {
          res, m_memory_regions.count, m_memory_regions.total_size);
 }
 
+std::string RetroAchievementsManager::generateHash(uint32_t consoleId, const std::string& gamePath, const uint8_t* buffer, size_t bufferSize) {
+    char generatedHash[33] = {0};
+    int hashSuccess = 0;
+    if (buffer && bufferSize > 0) {
+        hashSuccess = rc_hash_generate_from_buffer(generatedHash, consoleId, buffer, bufferSize);
+    } else if (!gamePath.empty()) {
+        hashSuccess = rc_hash_generate_from_file(generatedHash, consoleId, gamePath.c_str());
+    }
+
+    if (hashSuccess && generatedHash[0] != '\0') {
+        LOGI("Generated RA hash: %s for consoleId: %u", generatedHash, consoleId);
+        return std::string(generatedHash);
+    }
+    return "";
+}
+
 void RetroAchievementsManager::loadGame(uint32_t consoleId, const std::string& hash, const std::string& gamePath, const uint8_t* buffer, size_t bufferSize) {
     std::lock_guard<std::recursive_mutex> lock(m_mutex);
     if (!m_client) {

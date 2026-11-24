@@ -30,6 +30,7 @@ public:
     void init(JavaVM* vm, jobject listener, const std::string& username, const std::string& token, bool hardcore);
     void login(const std::string& username, const std::string& passwordOrToken, bool isPassword);
     void loadGame(uint32_t consoleId, const std::string& hash, const std::string& gamePath, const uint8_t* buffer = nullptr, size_t bufferSize = 0);
+    std::string generateHash(uint32_t consoleId, const std::string& gamePath, const uint8_t* buffer = nullptr, size_t bufferSize = 0);
     void onGameLoadedInCore();
     void doFrame();
     void idle();

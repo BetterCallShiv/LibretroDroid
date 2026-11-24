@@ -161,6 +161,12 @@ public class LibretroDroid {
         String gamePath
     );
 
+    public static native String generateRetroAchievementsHash(
+        int consoleId,
+        String gamePath,
+        byte[] buffer
+    );
+
     public static native void sendRetroAchievementsServerResponse(
         long requestId,
         int statusCode,

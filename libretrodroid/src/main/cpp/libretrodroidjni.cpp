@@ -634,6 +634,38 @@ JNIEXPORT void JNICALL Java_com_swordfish_libretrodroid_LibretroDroid_loadRetroA
     RetroAchievementsManager::getInstance().loadGame((uint32_t) jConsoleId, hash, gamePath);
 }
 
+JNIEXPORT jstring JNICALL Java_com_swordfish_libretrodroid_LibretroDroid_generateRetroAchievementsHash(
+    JNIEnv* env,
+    jclass obj,
+    jint jConsoleId,
+    jstring jGamePath,
+    jbyteArray jBuffer
+) {
+    std::string gamePath = jGamePath ? JniString(env, jGamePath).stdString() : "";
+    std::string hash;
+    if (jBuffer != nullptr) {
+        jsize len = env->GetArrayLength(jBuffer);
+        jbyte* bytes = env->GetByteArrayElements(jBuffer, nullptr);
+        if (bytes != nullptr) {
+            hash = RetroAchievementsManager::getInstance().generateHash(
+                (uint32_t) jConsoleId,
+                gamePath,
+                reinterpret_cast<const uint8_t*>(bytes),
+                (size_t) len
+            );
+            env->ReleaseByteArrayElements(jBuffer, bytes, JNI_ABORT);
+        }
+    } else {
+        hash = RetroAchievementsManager::getInstance().generateHash(
+            (uint32_t) jConsoleId,
+            gamePath,
+            nullptr,
+            0
+        );
+    }
+    return env->NewStringUTF(hash.c_str());
+}
+
 JNIEXPORT void JNICALL Java_com_swordfish_libretrodroid_LibretroDroid_sendRetroAchievementsServerResponse(
     JNIEnv* env,
     jclass obj,
